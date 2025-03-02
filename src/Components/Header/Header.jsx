@@ -1,18 +1,22 @@
-import React from "react";
 import style from "./header.module.css";
-import logo from "../../assets/Image/Amazon_Store-removebg-preview.png";
 import { SlLocationPin } from "react-icons/sl";
 import { BsSearch } from "react-icons/bs";
 import { BiCart } from "react-icons/bi";
 import LowerHeader from "./LowerHeader";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { DataContext } from "../DataProvider/DataProvidere";
 function Header() {
+  const [{basket},dispatch]=useContext(DataContext)
+ 
+  const totalProduct=basket.reduce((sum,item)=>sum+item.amount,0)
+   console.log(totalProduct)
   return (
-    <>
+    <div className={style.fixed_Header}>
       <div className={style.header_container}>
         <div className={style.logo_container}>
           <Link to="/">
-            <img src={logo} alt=""/>
+            <img src="/amazon_logo_white.png" alt="" />
           </Link>
           <div className={style.delivery}>
             <span>
@@ -59,17 +63,15 @@ function Header() {
             <span>&Orders</span>
           </Link>
           <Link to="/cart" className={style.cart}>
-            <BiCart size={35} />
-            <span>0</span>
+            {/* <BiCart size={35} /> */}
+            <img src="/cart2.png" alt="" />
+            <span>{totalProduct}</span>
           </Link>
         </div>
       </div>
       <LowerHeader />
-    </>
-  );
+    </div>
+  )
 }
 
 export default Header;
-
-
-

@@ -1,9 +1,9 @@
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { productUrl } from "../../Api/endpoint"
+import { productUrl } from "../../Api/endepoint"
 import LayOut from "../../Components/LayOut/LayOut"
-import ProductCard from "../../Components/Prodcut/ProductCard"
+import ProdcutCard from "../../Components/Product/ProdcutCard"
 import Loader from "../../Components/Loader/Loader"
 
 function ProductDetail() {
@@ -27,9 +27,11 @@ function ProductDetail() {
   },[])
   return (
     <LayOut>
-      {isLoading?(<Loader />):( <ProductCard data={product} flex={true} renderDesc={true}/>)}
-       
-    
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <ProdcutCard data={product} flex={true} renderDesc={true} renderADD ={true}/>
+      )}
     </LayOut>
   )
 }
