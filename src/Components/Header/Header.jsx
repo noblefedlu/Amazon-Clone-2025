@@ -7,9 +7,9 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { DataContext } from "../DataProvider/DataProvidere";
 function Header() {
-  const [{basket},dispatch]=useContext(DataContext)
- 
-  const totalProduct=basket.reduce((sum,item)=>sum+item.amount,0)
+  const [{basket}]=useContext(DataContext)
+
+  const totalProduct = basket.reduce((sum, item) => sum + item.amount, 0);
    console.log(totalProduct)
   return (
     <div className={style.fixed_Header}>
