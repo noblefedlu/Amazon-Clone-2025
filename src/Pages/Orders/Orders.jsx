@@ -1,49 +1,61 @@
-import React from 'react'
-import './Orders.css'
+import React, {useContext, useState, useEffect} from 'react'
+import Class from './Orders.module.css'
 import LayOut from '../../Components/LayOut/LayOut'
-import logo from '../../assets/Amazon_Logo_PNG_-_Free_Download-removebg-preview.png'
+import { db } from '../../Utility/firebase'
+import { DataContext } from '../../Components/DataProvider/DataProvidere'
+// import { data } from 'react-router-dom'
+import ProdcutCard from '../../Components/Product/ProdcutCard'
 
 function Orders() {
+
+  const [{user}, dispatch] = useContext(DataContext);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(({})=>{
+    if (user) {
+      db.collection('users')
+      .doc('user.uid')
+      .collection('orders')
+      .orderBy('created', 'descending')
+      .onSnapshot((snapshot) => {
+        console.log(snapshot)
+        setOrders(snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data(), }))
+      );
+      });
+    }else{
+      setOrders([])
+    }
+  }
+  ,[])
+
   return (
     <LayOut>
-      <div className="container">
-      <div className="content-wrapper">
-        <img src={logo} alt="" className='logo'/>
-        
-        <div className="form-container">
-          <h2 className="sign-in-title">Sign in</h2>
-          
-          <label className="label">Email or mobile phone number</label>
-          <input className="input" type="email" />
-          
-          <button className="continue-button">Continue</button>
-          
-          <p className="agreement-text">
-            By continuing, you agree to Amazon's <a href="#" className="link">Conditions of Use</a> and{' '}
-            <a href="#" className="link">Privacy Notice</a>.
-          </p>
-          
-          <a href="#" className="help-link">Need help?</a>
-        </div>
+      <section className={Class.container}>
+        <div className={Class.orderContainer}>
+          <h2>Your Orders</h2>
+          {orders?.length == 0 && <div style={{padding:'20px'}}>You don't have orders yet.</div>}
+          {/* order items */}
+          <div>
+            {
+              orders?.map((eachorder, i) => {
+                return (
+                  <div key={i}>
+                    <hr />
+                    <p>Order ID: {eachorder?.id}</p>
+                    {
+                      eachorder?.data?.basket?.map(order =>{
 
-        <div className="divider">
-          <hr className="hr-style" /> 
-          <span className="divider-text">New to Amazon?</span>
-          <hr className="hr-style" />
+                return (
+                      <ProdcutCard
+                      flex={true} product={order} key={order?.id}/> )})
+                    }
+                  </div>
+                )
+              })
+            }
+          </div>
         </div>
-
-        <button className="create-account-button">Create your Amazon account</button>
-      </div>
-
-      <footer className="footer">
-        <div className="footer-links">
-          <a href="#" className="footer-link">Conditions of Use</a>
-          <a href="#" className="footer-link">Privacy Notice</a>
-          <a href="#" className="footer-link">Help</a>
-        </div>
-        <p className="copyright-text">1996-2025, Amazon.com, Inc. or its affiliates</p>
-      </footer>
-    </div>  
+    </section>  
     </LayOut>
     
   )

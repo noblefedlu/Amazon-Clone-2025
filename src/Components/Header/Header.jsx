@@ -1,22 +1,24 @@
-import style from "./header.module.css";
-import { SlLocationPin } from "react-icons/sl";
-import { BsSearch } from "react-icons/bs";
-import { BiCart } from "react-icons/bi";
-import LowerHeader from "./LowerHeader";
-import { Link } from "react-router-dom";
-import { useContext } from "react";
-import { DataContext } from "../DataProvider/DataProvidere";
+import style from "./header.module.css"
+import { SlLocationPin } from "react-icons/sl"
+import { BsSearch } from "react-icons/bs"
+import { BiCart } from "react-icons/bi"
+import LowerHeader from "./LowerHeader"
+import { Link } from "react-router-dom"
+import { useContext } from "react"
+import { DataContext } from "../DataProvider/DataProvidere"
+import { auth } from "../../Utility/firebase"
 function Header() {
-  const [{basket}]=useContext(DataContext)
+  const [{ basket, user }, dispatch] = useContext(DataContext)
 
-  const totalProduct = basket.reduce((sum, item) => sum + item.amount, 0);
-   console.log(totalProduct)
+  const totalProduct = basket.reduce((sum, item) => sum + item.amount, 0)
+
+  console.log(totalProduct)
   return (
     <div className={style.fixed_Header}>
       <div className={style.header_container}>
         <div className={style.logo_container}>
           <Link to="/">
-            <img src="/amazon_logo_white.png" alt="" />
+            <img src="amazon_logo_white.png" alt="" />
           </Link>
           <div className={style.delivery}>
             <span>
@@ -52,10 +54,27 @@ function Header() {
               </select>
             </div>
           </a>
-          <Link to="/auth">
+          <Link to={!user && "/auth"}>
             <div className="">
-              <p>Hello, sign in</p>
-              <span>Account and List</span>
+              {user ? (
+                <>
+                  <p>Hello {user?.email.split("@")[0]}</p>
+                  <span
+                    onClick={() => {
+                      auth.signOut()
+                      console.log("clicked", user)
+                    }}
+                  >
+                    {" "}
+                    Sign Out
+                  </span>
+                </>
+              ) : (
+                <>
+                  <p>Hello, Sign In</p>
+                  <span>Account & List</span>
+                </>
+              )}
             </div>
           </Link>
           <Link to="/orders">
@@ -64,7 +83,7 @@ function Header() {
           </Link>
           <Link to="/cart" className={style.cart}>
             {/* <BiCart size={35} /> */}
-            <img src="/cart2.png" alt="" />
+            <img src="cart2.png" alt="" />
             <span>{totalProduct}</span>
           </Link>
         </div>
@@ -74,4 +93,4 @@ function Header() {
   )
 }
 
-export default Header;
+export default Header
