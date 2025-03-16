@@ -1,140 +1,156 @@
-import React, {useContext, useState} from 'react'
-import Class from "./Payment.module.css"
-import LayOut from '../../Components/LayOut/LayOut'
-import { DataContext } from '../../Components/DataProvider/DataProvidere'
-import ProductCard from '../../Components/Product/ProdcutCard'
-import {useStripe, useElements, CardElement} from '@stripe/react-stripe-js';
-// import { colors } from '@mui/material'
-import CurrencyFormat from '../../Components/CurrecyFormat/CurrencyFormat'
-import { axiosInstance } from '../../Api/axios'
-import {ClipLoader} from 'react-spinners'
-import { db } from '../../Utility/firebase'
-import { useNavigate } from 'react-router-dom'
+import React, { useContext, useState } from "react";
+import style from "./payment.module.css";
+import LayOut from "../../Components/LayOut/LayOut";
+import { DataContext } from "../../Components/DataProvider/DataProvidere";
+import ProductCard from "../../components/Product/ProdcutCard";
+// import product from "../../components/Products/Products";
+import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+import CurrencyFormat from "../../components/CurrecyFormat/CurrencyFormat";
+import { axiosinstance } from "../../API/axios";
+import { ClockLoader } from "react-spinners";
+import { db } from "../../Utility/firebase";
+import { useNavigate } from "react-router-dom";
 
 function Payment() {
-  const [{user, basket }, dispatch] = useContext(DataContext)
+  const [{ user, cart }, dispatch] = useContext(DataContext);
+  //console.log("user",user);
+  //console.log("cart",cart);
 
-  const totalProduct = basket.reduce((sum, item) => sum + item.amount, 0)
+  const totalamount = cart.reduce((amount, item) => item.amount + amount, 0);
 
-  const totalPrice = basket.reduce((sum, item) => sum + item.price*item.amount, 0)
+  const total = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
 
-  const {cardError, setCardError} = useState(null)
-  const {processing, setProcessing} = useState(false)
+  const [cardError, setCardError] = useState(null);
+  const [processing, setProcessing] = useState("");
 
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    // console.log(e)
-    e?.error?.message ? setCardError(e.error.message) : setCardError(null)
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handlpayment = async (e) => {
+    e.preventDefault();
 
     try {
-    const response = await axiosInstance({method: "post", url: `/payments/create?total=${total *100}`
-    })
+      setProcessing(true);
+      // 1
+      //      backend  || function-------> contact to clint secret key
+      const response = await axiosinstance({
+        method: "post",
+        url: `/payment/create?total=${total * 100}`,
+      });
 
-    const clientSecret = response.data?.clientSecret;
-    const confirmation = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement)
-      }
-      
-    })
-    // console.log(confirmation)
-    await db.collection('users').doc(user?.uid).collection('orders').doc(paymentIntent.id).set({
-      basket: basket,
-      amount: paymentIntent.amount,
-      created: paymentIntent.created,
-    })
+      //console.log(response.data);
+      const clientSecret = response.data?.clientSecret;
+      console.log(clientSecret);
 
-    
-      //empty the basket
+      // 2    clint side (react side conformation)
+      const { paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
 
-      dispatch({type: Type.EMPTY_BASKET })
-    setProcessing(false)
-    navigator('/orders',  {message: 'You have placed new order'} )
-    } catch (error) {
-      // console.log(error)
-      setProcessing(false)
+      // 3
+      //    after confermation  ---------> order firestore database save,clear cart,redirect to order page
+
+      await db
+        .collection("users")
+        .doc(user?.uid)
+        .collection("orders")
+        .doc(paymentIntent.id)
+        .set({
+          cart: cart,
+          amount: paymentIntent.amount,
+          created: paymentIntent.created,
+        });
+
+      // empty the cart
+      dispatch({ type: "EMPTY_CART" });
+
+      setProcessing(false);
+      navigate("/orders", { state: { msg: "order placed successfully" } });
+    } catch (err) {
+      //console.log(err);
+      setProcessing(false);
     }
-  }
+  };
+
+  const handlchange = async (e) => {
+    console.log(e);
+    if (e.error) {
+      setCardError(e.error.message);
+    } else {
+      setCardError(null);
+    }
+  };
+  //console.log("payment");
 
   return (
     <LayOut>
-      {/* header */}
-      <div className={Class.Payment-header}>
-        checkout ({totalProduct}) items
-      </div>
-      {/* payment method */}
-
-    <section className={Class.payment}>
-      {/* address */}
-      <hr />
-
-      <div className={Class.flex}>
-        <h3>Delivery Address</h3>
-        <div>
-        <div>{user?.email}</div>
-          <div>Abnet </div>
-          <div>Addis Abeba</div>
-        </div>
-      </div>
-
-      {/* products */}
-      <div>
-        <h3>Review items and delivery</h3>
-        <div>
-          {
-          basket?.map((item) => <ProductCard product={item} flex={true}/>)
-          }
-        </div>
-      </div>
-      <hr />
-      
-      {/* card form */}
-      <div className={Class.flex}>
-        <h3>Payment Method</h3>
-        <div className={Class.paymentCardContainer}>
-          <div className={Class.paymentDetails}>
-            <form onSubmit={handleSubmit}>
-              {/* error */}
-              {cardError && <small style={{color: "red"}
-              }>{cardError}</small>}
-              {/* card element */}
-              <CardElement onChange={handleChange}/>
-              {/* price */}
-              <div className={Class.paymentPrice}>
-              <div>
-                <span style={{display: "flex", gap: "10px"}}>
-                  <p>Subtotal |</p> <CurrencyFormat amount={totalPrice} />
-                 <p>Total Order |</p> <CurrencyFormat amount={total} />
-                </span>
-              </div>
-              <button type='submit'>
-                {
-                  processing ? (
-                    <div children={Class.loading}>
-                      <ClipLoader color= 'gray' size={12} />
-                      <p>Please wait ...</p>
-                    </div>
-                  ) : 'Pay Now'
-                }
-                </button>
-              </div>
-            </form>
+      {/Header/}
+      <div className={style.payment_header}>Chack out {totalamount} items</div>
+      {/payment method/}
+      <section className={style.payment_method}>
+        {/* addres*/}
+        <div className={style.address_flex}>
+          <h3>Delivery Address</h3>
+          <div>
+            <div>Zak@gmail.com </div>
+            <div>Addis Ababa </div>
+            <div>Ethiopia </div>
           </div>
         </div>
-      </div>
-      <hr />
+        <hr />
 
-    </section>
+        {/*products */}
+        <div className={style.address_flex}>
+          <h3>Review items and Delivery</h3>
+        </div>
 
+        <div>
+          {cart?.map((item) => (
+            <ProductCard data={item} flex={true} />
+          ))}
+        </div>
+        <hr />
+
+        {/*card form */}
+        <div className={style.address_flex}>
+          <h3>payment method</h3>
+          <div className={style.payment_card_container}>
+            <div className={style.payment_details}>
+              <form onSubmit={handlpayment}>
+                {/* error */}
+                {cardError && (
+                  <small style={{ color: "#fff" }}>{cardError}</small>
+                )}
+                {/* card */}
+                <CardElement onChange={handlchange} />
+
+                {/* price */}
+                <div className={style.payment_price}>
+                  <div>
+                    <span style={{ display: "flex", gap: "15px" }}>
+                      Total Order | <CurrencyFormat amount={total} />
+                    </span>
+                  </div>
+                  <button type="submit">
+                    {processing ? (
+                      <div className={style.loading_processing}>
+                        <ClockLoader color={"#fff"} size={20} />
+                        <p>please wait...</p>
+                      </div>
+                    ) : (
+                      "Pay Now"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </LayOut>
-  )
+  );
 }
-
-export default Payment
+export default Payment;

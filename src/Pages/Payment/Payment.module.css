@@ -1,63 +1,79 @@
-.Payment-header{
+.payment_header{
     padding: 20px;
-    text-align: center;
+    background-color: #f1f1f1;
     font-size: 24px;
-    background-color: rgb(234, 237, 237);
-}
-.payment{
-    padding: 40px;
-}
-.flex{
+    font-weight: bold;
+    text-align: center;
+    
+    }
+    .payment_method{
+    padding: 30px;
+    }
+    .address_flex{
+    
     display: flex;
+    justify-content: space-between;
     gap: 20px;
     padding: 30px;
-}
-.flex h3{
-    min-width: 300px;
-}
-.flex img{
-    width: 80px !important;
-}
-.flex div{
-    height: auto !important;
-}
-.paymentCardContainer{
+    
+    }
+    .address_flex h3{
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 400px;
+    }
+    .address_flex img{
+        width: 80px ! important;
+    
+    }
+    .address_flex div{
+        height: auto ! important;
+    }
+    .payment_card_container{
     max-width: 350px;
     width: 100%;
-}
-/* .paymentDetails{
-    font-size: 20px;
-} */
-.paymentPrice{
+    
+    }
+    .payment_price{
     padding: 20px;
-}
-.paymentPrice > div{
+    }
+    .payment_price > div{
     display: flex;
     font-size: 16px;
     gap: 10px;
-}
-.paymentDetails button{
-    width: 100%;
-    margin-top: 15px;
-    padding: 8px 10px;
-    background-color: var(--prime-color);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.paymentDetails button:hover{
-    background-color: var(--prime-shade);
-}
-.loading{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    color: rgb(52, 52, 52);
-}
-
-@media screen and (max-width: 768px){
-    .flex{
-        flex-direction: column;
     }
-}
+    .payment_details button{
+        width: 100%;
+        padding: 10px;
+        background-color: #f1f1f1;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #000;
+        margin-top: 20px;
+        border-radius: 5px;
+    
+    
+    }
+    .payment_details button:hover{
+        background-color: #000;
+        color: #fff;
+    }
+    .loading_processing{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: rgb(52, 52, 52);
+        gap: 10px;
+    }
+    
+    
+    
+    @media screen and (max-width: 768px){
+        .address_flex{
+            flex-direction: column;
+            gap: 20px;
+        }
+       }
