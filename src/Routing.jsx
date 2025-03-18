@@ -20,6 +20,7 @@ function Routing() {
         <Routes basename="/amazon-clone">
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          
           <Route path="/payment" element={
 
             <ProtectedRoute message={"Please login to continue"} redirect={"/payment"}>
